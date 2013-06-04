@@ -1,0 +1,31 @@
+remote <%= @ipaddress %> {
+   doi ipsec_doi;
+   situation identity_only;
+   exchange_mode aggressive;
+   my_identifier keyid_use "<%= @my_identifier %>";
+   verify_identifier off;
+   shared_secret keychain "<%= @shared_secret %>";
+   nonce_size 16;
+   dpd_delay 20;
+   dpd_retry 5;
+   dpd_maxfail 5;
+   dpd_algorithm dpd_blackhole_detect;
+   initial_contact on;
+   support_proxy on;
+   proposal_check obey;
+   xauth_login "<%= @xauth_login %>";
+   mode_cfg on;
+
+<% @encryption_algorithms.each_key do |hash| -%>
+<%   @encryption_algorithms[hash].each do |crypto| -%>
+   proposal {
+      authentication_method xauth_psk_client;
+      hash_algorithm <%= hash %>;
+      encryption_algorithm <%= crypto %>;
+      lifetime <%= node['racoon']['proposal_lifetime'] %>;
+      dh_group 2;
+   }
+
+<%   end -%>
+<% end -%>
+}
